@@ -30,8 +30,9 @@ Créer un protocole qui permet facilement de faire communiquer 2 modules électr
 ## Spécifications techniques
 
 * **asynchrone**. Inhérent au protocole série. Il est possible d'ajouter un système d'accusé de réception mais cela nuirait à la simplicité. A étudier au besoin.
+* **1 seule commande à la fois**
 * **types de messages**
-   * **action**
+   * **action/ordre**
      * verbe (lisibilité). Eviter les codes et abréviations, les nanosecondes gagnées sont elles si primordiales par rapport à la lisibilité ?
      * avec/sans paramètre
      * avec/sans retour. Le retour doit contenir une référence vers l'identifiant de l'action causale.
@@ -41,6 +42,41 @@ Créer un protocole qui permet facilement de faire communiquer 2 modules électr
   * non typés. A l'appelant de savoir quoi envoyer.
 * **identification du message** et **horodatage**. Du fait de l'asynchronisme il est utile de pouvoir dater et connaître un message. Par exemple pour qu'un retour soit reconnu comme le retour d'un appel donné.
 * **identification des intervenants**. L'émetteur et le receveur. Nécessaire en mode multi-points.
+* **pas de gestion d'erreur de communication**. Le protocole sous-jacent s'en occupe (en partie).
 * **implémentations (languages)**
   * **C++** pour l'Arduino (ESP/AVR) et le Raspberry.
   * ? **Python** pour le Raspberry
+
+## Définition
+
+* caractère de début de message : ```#```
+* caractère de fin de message : ```\n```
+* id émetteur (optionnel en UART)
+* ids receveurs (optionnel en UART). Le receveur vérifie s'il fait partie des destinataires (rendre ce check désactivable ?).
+* date : ```yyyymmddhhMMss```
+* id message. Séquence de ```uint8_t``` ou ```uint16_t``` (à définir : occupation mémoire, utilité d'un grand nombre).
+* id du message initial
+* séparateur primaire : ```|```. Il sépare les champs du message : date, verbe, paramètres...
+* séparateur secondaire : ```^```. Il séprare les éléments d'une liste.
+* caractère d'échappement : ```\```. A utiliser si une donnée contient un des caractères utilisés dans la syntaxe du protocole.
+
+### Exemples
+
+#### Méthode sans paramètre avec retour
+
+Le module 1 demande aux modules 2 et 3 la température :
+```
+#1|2^3|20180610110526|123||getTemperature\n
+```
+
+Le module 2 donne au module 1 la température :
+```
+#2|1|20180610110526|84|123|temperature|21\n
+```
+
+Le module 3 donne au module 1 la température :
+```
+#3|1|20180610110526|17|123|temperature|21\n
+```
+
+*Noter que chaque module possède sa propre séquence d'identifiant de message. Nul besoin de partager une séquence unique. D'ailleurs, cela impliquerait un maître, du moins pour la génération des nombres.*
