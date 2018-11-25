@@ -47,7 +47,9 @@ Créer un protocole qui permet facilement de faire communiquer 2 modules électr
   * **C++** pour l'Arduino (ESP/AVR) et le Raspberry.
   * ? **Python** pour le Raspberry
 
-## Définition
+## Etude en cours
+
+### le protocole
 
 * caractère de début de message : ```#```
 * caractère de fin de message : ```\n```
@@ -59,6 +61,17 @@ Créer un protocole qui permet facilement de faire communiquer 2 modules électr
 * séparateur primaire : ```|```. Il sépare les champs du message : date, verbe, paramètres...
 * séparateur secondaire : ```^```. Il séprare les éléments d'une liste.
 * caractère d'échappement : ```\```. A utiliser si une donnée contient un des caractères utilisés dans la syntaxe du protocole.
+* convention de nommage sur setter/getter/retour de setter/retour de getter ?
+
+### implémentation
+
+* utilisation d'objets de type ```Stream``` (cf. https://www.arduino.cc/en/Reference/APIStyleGuide et https://github.com/andrewrapp/xbee-arduino). Dans le constructeur : ```(Stream &serial)```. Attention, Stream fait référence aux liaisons série mais aussi à l'ethernet et au wifi, peut-être une point à noter dans la doc.
+
+### ToDo
+
+* algorigrammes de la lecture sur le port série, UART et I²C différents.
+* diagramme de classe
+* quel logiciel pour ça ? Dia, yEd, Libre Office.
 
 ### Exemples
 
@@ -71,12 +84,12 @@ Le module 1 demande aux modules 2 et 3 la température :
 
 Le module 2 donne au module 1 la température :
 ```
-#2|1|20180610110526|84|123|temperature|21\n
+#2|1|20180610110526|84|123|temperatureIs|21\n
 ```
 
 Le module 3 donne au module 1 la température :
 ```
-#3|1|20180610110526|17|123|temperature|21\n
+#3|1|20180610110526|17|123|temperatureIs|21\n
 ```
 
 *Noter que chaque module possède sa propre séquence d'identifiant de message. Nul besoin de partager une séquence unique. D'ailleurs, cela impliquerait un maître, du moins pour la génération des nombres.*
